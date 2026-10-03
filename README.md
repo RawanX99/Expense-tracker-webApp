@@ -13,7 +13,7 @@ You need [Node.js](https://nodejs.org), PostgreSQL with pgAdmin, and VS Code (yo
  
 1. In pgAdmin, create a database named for example `expense_tracker`. Open its Query Tool (the tab must say `expense_tracker`), load `backend/schema.sql` and run it. It creates the `expenses` table with 8 sample rows (running it again resets the data).
 
-2. In the `backend` folder, copy `.env.example` to `.env` and write your own values:
+2. In the `backend` folder, create `.env` file and write your own values:
 ```
    DB_USER=postgres
    DB_HOST=localhost
@@ -80,11 +80,11 @@ Extras:
 
 **Desktop**
  
-![Desktop view](image/Light Mode.png)
+![Desktop view](.\frontend\image\Light Mode.png)
  
 **Mobile**
  
-![Mobile view](\image\mobile.png)
+![Mobile view](\frontend\image\mobile.png)
 ![Mobile view](\image\mobile 2.png)
 
 
