@@ -80,12 +80,12 @@ Extras:
 
 **Desktop**
  
-![Desktop view](\frontend\image\Light_Mode.png)
+![Desktop view](frontend/image/Light_Mode.png)
  
 **Mobile**
  
-![Mobile view](\frontend\image\mobile.png)
-![Mobile view](\image\mobile2.png)
+![Mobile view](frontend/image/mobile.png)
+![Mobile view](image/mobile2.png)
 
 
 **Dark mode**
