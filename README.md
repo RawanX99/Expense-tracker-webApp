@@ -85,7 +85,7 @@ Extras:
 **Mobile**
  
 ![Mobile view](frontend/image/mobile.png)
-![Mobile view](image/mobile2.png)
+![Mobile view](frontend/image/mobile2.png)
 
 
 **Dark mode**
