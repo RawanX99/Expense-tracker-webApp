@@ -91,7 +91,7 @@ Extras:
 **Dark mode**
  
  
-![Dark Mode](\image\Dark Mode.png)
+![Dark Mode](frontend/image/Dark_Mode.png)
  
 ## What was the hardest part?
 
