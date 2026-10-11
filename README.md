@@ -100,16 +100,18 @@ You need [Node.js](https://nodejs.org), PostgreSQL with pgAdmin, and VS Code (yo
 
 **Desktop**
  
-![Desktop view](frontend/image/Light_Mode.png)
+![Desktop view](frontend/image/website.png)
  
 **Mobile**
  
 ![Mobile view](frontend/image/mobile.png)
 ![Mobile view](frontend/image/mobile2.png)
+![Mobile view](frontend/image/mobile3.png)
+
 
 
 **Dark mode**
  
-![Dark Mode](frontend/image/Dark_Mode.png) 
+![Dark Mode](frontend/image/dark_theme.png) 
 
 
