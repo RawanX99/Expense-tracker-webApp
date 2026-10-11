@@ -7,7 +7,8 @@ import{
     ValidateExpense,
     ValidateId,
     updateExpense,
-    deleteExpense
+    deleteExpense,
+    getExpensesByCategory
 }from "./controllers.js";
 
 const PORT=3000;
@@ -22,6 +23,8 @@ apiRoute.get("/expenses/:id",ValidateId,getExpenseById);
 apiRoute.post("/expenses",ValidateExpense,createExpense);
 apiRoute.put("/expenses/:id",ValidateId,ValidateExpense,updateExpense);
 apiRoute.delete("/expenses/:id",ValidateId,deleteExpense);
+apiRoute.delete("/expenses/:id",ValidateId,deleteExpense);
+apiRoute.get("/expenses/stats/category",getExpensesByCategory);
 
 
 app.use("/api",apiRoute);

@@ -1,20 +1,38 @@
 # Expense Tracker
 
-Track expenses is a web app to track the personal expenses: add, edit and delete expenses, filter them by category or search by title, and see the total, the number of expenses and the highest one at a glance.
+Expense Tracker is a web app to track the personal expenses: add, edit and delete expenses, filter them by category or search by title, , export them to CSV, and see where your money goes with a total, a monthly line chart and a category doughnut chart.
 
-the front-end (HTML, CSS, JS, Bootstrap) talks to a Node.js and Express API that stores everything in POstgreSQL.
+the front-end (HTML, CSS, JS, Bootstrap, Chart.js) talks to a Node.js and Express API that stores everything in POstgreSQL.
+
+
+## Features
+ 
+- [x] Add an expense (with validation in the browser and on the server)
+- [x] Delete an expense
+- [x] Edit an expense
+- [x] Filter by category
+- [x] Summary cards (total, count, highest)
+- [x] Data is saved in a PostgreSQL database
+- [x] Line chart of spending per month, with a year selector
+- [x] Doughnut chart of spending by category (the tooltip shows the total and the percentage)
+- [x] Export the filtered table to a CSV file (it opens in Excel)
+- [x] Search by title (works together with the category filter)
+- [x] Dark mode (the choice is saved in the browser)
+- [x] Loading spinner while a request is running
+- [x] Clear alerts for success and errors, including when the server is off
+- [x] Responsive layout
 
 ## How to run
 
 You need [Node.js](https://nodejs.org), PostgreSQL with pgAdmin, and VS Code (you can use **Live Server** extension).
-repository:https://github.com/RawanX99/Expense-tracker-webApp.git
+
 
 **Backend**
 
  
 1. In pgAdmin, create a database named for example `expense_tracker`. Open its Query Tool (the tab must say `expense_tracker`), load `backend/schema.sql` and run it. It creates the `expenses` table with 8 sample rows (running it again resets the data).
 
-2. In the `backend` folder, create `.env` file and write your own values:
+2. In the `backend` folder, copy `.env.example` to `.env` and write your own values:
 ```
    DB_USER=postgres
    DB_HOST=localhost
@@ -53,29 +71,30 @@ repository:https://github.com/RawanX99/Expense-tracker-webApp.git
 |---|---|
 | `password authentication failed` | Wrong `DB_PASSWORD` in `.env` |
 | `relation "expenses" does not exist` | `schema.sql` was run on the wrong database. Run it again on `expense_tracker` |
+| `function get_expenses_by_category() does not exist` | The doughnut chart stays empty. Run the whole `schema.sql` again, because it creates this function |
 | `ECONNREFUSED` | PostgreSQL is not running |
 | `Cannot use import statement outside a module` | Missing `"type": "module"` in `package.json` |
-| `Cannot find package 'express'` | Run `npm install` inside the `backend` folder |
-| The page shows "Cannot reach the server" | The backend is not running. Start it with `node server.js` |
-
+| `Cannot find package 'express'` | Run `npm install` in the project folder |
+| The page shows "Failed to Fetch expenses" | The backend is not running. Start it with `node server.js` |
+| The charts do not appear | Check your internet connection, because Bootstrap and Chart.js are loaded from a CDN |
 
 ## Features
  
-- [x] Add an expense (with validation)
+- [x] Add an expense (with validation in the browser and on the server)
 - [x] Delete an expense
 - [x] Edit an expense
 - [x] Filter by category
 - [x] Summary cards (total, count, highest)
 - [x] Data is saved in a PostgreSQL database
-
-
-Extras:
- 
+- [x] Line chart of spending per month, with a year selector
+- [x] Doughnut chart of spending by category (the tooltip shows the total and the percentage)
+- [x] Export the filtered table to a CSV file (it opens in Excel)
 - [x] Search by title (works together with the category filter)
 - [x] Dark mode (the choice is saved in the browser)
 - [x] Loading spinner while a request is running
 - [x] Clear alerts for success and errors, including when the server is off
 - [x] Responsive layout
+
 
 ## Screenshots
 
@@ -91,9 +110,6 @@ Extras:
 
 **Dark mode**
  
- 
-![Dark Mode](frontend/image/Dark_Mode.png)
- 
-## What was the hardest part?
+![Dark Mode](frontend/image/Dark_Mode.png) 
 
-The hardest part was the edit modal: it had to open with the data of the expense I clicked, and saving had to update that exact expense. I stored the expense id in a `data-id` attribute on each Edit button, read it with `event.relatedTarget` and filled the form from the `expenses` array, and kept the id on the form (`editForm.dataset.id`) so the Save button knows which expense to send in the PUT request.
+

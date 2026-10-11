@@ -27,7 +27,7 @@ export const getAllExpenses=async (req,res)=>{
     try {
         const result=await pool.query(`SELECT 
             ${COLUMNS}
-            FROM expenses ORDER BY id`);
+            FROM expenses ORDER BY date DESC, id DESC`);
 
             res.status(200).json(result.rows);
 
@@ -40,8 +40,6 @@ export const getExpenseById=async (req,res)=>{
 
     const id=req.params.id;
 
-
-    
     try{
         const result=await pool.query(
             `SELECT ${COLUMNS} From expenses WHERE id=$1`,[id]
@@ -94,7 +92,7 @@ export const ValidateId=(req,res,next)=>{
 }
 
 export const ValidateExpense=(req,res,next)=>{
-
+    
     const {title,amount, category,date}=req.body ?? {};
     if(!title || typeof title !=="string" || title.trim() === ""){
         return res.status(400).json({
@@ -102,9 +100,13 @@ export const ValidateExpense=(req,res,next)=>{
         });
     }
 
-    if(typeof amount !== "number" || Number.isNaN(amount) || amount <=0){
+     if (title.trim().length > 100) {
+        return res.status(400).json({ message: "Title must be 100 characters or less" });
+    }
+
+    if(typeof amount !== "number" || Number.isNaN(amount) || amount <= 0 || amount > 9999.99){
         return res.status(400).json({
-            message: "amount is required and must be a number greater than 0"
+            message: "amount is required and must be a number between 0 and 9999.9"
         });
     }
 
@@ -114,7 +116,7 @@ export const ValidateExpense=(req,res,next)=>{
         });
     }
 
-    if(!date || Number.isNaN(Date.parse(date))){
+    if(!date ||  !/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(Date.parse(date))){
                 return res.status(400).json({
             message:"date is required and must be a valid date (YYYY-MM-DD)"
         });
@@ -175,3 +177,15 @@ export const deleteExpense= async (req,res) =>{
     }
 
 }
+
+export const getExpensesByCategory=async(req,res)=>{
+    try{
+        const result=await pool.query(`
+            SELECT category, total::float8 AS total FROM get_expenses_by_category()`);
+
+        
+        res.status(200).json(result.rows);
+    }catch (error) {
+        res.status(500).json({ message: "Failed to fetch category totals" });
+    }
+};
