@@ -104,7 +104,7 @@ You need [Node.js](https://nodejs.org), PostgreSQL with pgAdmin, and VS Code (yo
  
 **Mobile**
  
-![Mobile view](frontend/image/mobile.jpeg)
+![Mobile view](frontend/image/mobile.jpg)
 ![Mobile view](frontend/image/mobile2.png)
 ![Mobile view](frontend/image/mobile3.png)
 
