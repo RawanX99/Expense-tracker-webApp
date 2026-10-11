@@ -112,6 +112,6 @@ You need [Node.js](https://nodejs.org), PostgreSQL with pgAdmin, and VS Code (yo
 
 **Dark mode**
  
-![Dark Mode](frontend/image/dark_theme.png) 
+![Dark Mode](frontend/image/darktheme.png) 
 
 
