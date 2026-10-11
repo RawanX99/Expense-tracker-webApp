@@ -18,8 +18,21 @@ const loadingOverlay = document.getElementById("loading-overlay");
 const searchInput = document.getElementById("searchByTitle");
 const themeToggle = document.getElementById("themeToggle");
 const themeIcon = themeToggle.querySelector("i");
+const lineChart=document.getElementById("line-chart");
+const pieChart=document.getElementById("pie-chart");
+const yearSelect=document.getElementById("year-select");
+const csvButton=document.getElementById("export-csv");
+const xlsxButton=document.getElementById('export-xlsx');
 
 const CATEGORIES = ["Food", "Transport","Bills", "Entertainment", "Other"];
+let expenses;
+let lineChartInstance;
+let pieChartInstance;
+let categoryTotals = null;
+let currentExpenses=[];
+
+let isDark = document.documentElement.getAttribute("data-bs-theme") === "dark";
+
 
 function showLoadingOverlay() {
     loadingOverlay.classList.remove("d-none");
@@ -46,7 +59,7 @@ async function getExpenses(){
         return data;
 
     }catch(error){
-        showAlert(error.message,"danger");
+        showAlert(error instanceof TypeError? "Failed to Fetch expenses":error.message,"danger");
         return null;
     }finally{
         hideLoadingOverlay();
@@ -54,13 +67,17 @@ async function getExpenses(){
 
 }
 
-let expenses;
 
 async function refresh(){
     expenses=await getExpenses();
-    if (!expenses || expenses.length===0) return;
+    if(!expenses)return;
+    if (expenses.length===0)showAlert("no expenses Found","warning");
     summaryData();
     applyFilter();
+    getYearOptions();
+    categoryTotals = await groupExpensesByCategory();
+    if (categoryTotals) getPieChart(categoryTotals);
+
 
 }
 
@@ -89,19 +106,15 @@ async function  summaryData(){
     const count=expenses.length;
 
     const highestExpense=expenses.reduce((highest,expense)=>{
-        return Number(expense.amount)>Number(highest.amount)?expense:highest;
+        return expense.amount>highest.amount?expense:highest;
     });
-    
 
     totalCard.textContent=`${total.toFixed(2)}`;
     countCard.textContent=`${count}`;
     highestValue.textContent=`${highestExpense.amount}`;
     highestName.textContent=`${highestExpense.title}`;
 
-
-
 }
-
 
 
 function getCategoryOptions(){
@@ -203,7 +216,7 @@ addForm.addEventListener("submit",async (event)=>{
 
         addForm.reset();
         await refresh();
-        showAlert("Expense added.", "success");
+        showAlert(`${result.title} expense added successfully!.`, "success");
 
         }catch(error){
             showAlert(error.message,"danger");
@@ -236,7 +249,7 @@ async function applyFilter(){
     const filteredList=expenses.filter(expense => {
         return (expense.category ===selectedCategory || selectedCategory === "All") && expense.title.toLowerCase().includes(searchedTitle);
     });
-
+    currentExpenses=filteredList;
     renderTable(filteredList);
 
 
@@ -356,6 +369,8 @@ deleteModal.addEventListener("show.bs.modal", (event) => {
 
 saveButton.addEventListener("click",async ()=>{ 
     
+    if (!editForm.reportValidity()) return;
+
     const data=validateForm(editForm);
     if(!data) return;
 
@@ -380,7 +395,7 @@ saveButton.addEventListener("click",async ()=>{
         }
 
         await refresh();
-        showAlert("Expense updated.","success");
+        showAlert(`${result.title} expense updated successfully!.`,"success");
     }catch(error){
         showAlert(error.message,"danger");
     }finally{
@@ -407,7 +422,7 @@ deleteButton.addEventListener("click",async ()=>{
         }
 
         await refresh();
-        showAlert("Expense deleted.","success");
+        showAlert(`${result.title} expense deleted successfully!.`,"success");
 
     }catch(error){
         showAlert(error.message,"danger");
@@ -422,22 +437,230 @@ deleteButton.addEventListener("click",async ()=>{
 
 searchInput.addEventListener("input",applyFilter);
 
-if (document.documentElement.getAttribute("data-bs-theme") === "dark") {
+if (isDark) {
     themeIcon.className = "bi bi-moon-fill";
 }
 
 themeToggle.addEventListener("click",()=>{
 
     const htmlElement=document.documentElement;
+    isDark=!isDark;
 
-    if(htmlElement.getAttribute("data-bs-theme")==="dark"){
-        htmlElement.setAttribute("data-bs-theme","light");
-        themeIcon.className = "bi bi-sun-fill";
-        localStorage.setItem("theme","light");
+    htmlElement.setAttribute("data-bs-theme", isDark ? "dark" : "light");
+    themeIcon.className = isDark ? "bi bi-moon-fill" : "bi bi-sun-fill";
+    localStorage.setItem("theme", isDark ? "dark" : "light");
+
+    lineChartInstance.destroy();
+    lineChartInstance=null;
+    getLineChart(yearSelect.value);
+
+    pieChartInstance.destroy();
+    pieChartInstance=null;
+    getPieChart(categoryTotals??0);
+    
+
+});
+
+
+
+function groupExpensesByMonth(year){
+    const expensePerYear=expenses.filter(expense =>{
+        return expense.date.slice(0,4)===year; 
+    });
+
+
+    const totalExpenses=[];
+
+    for(let i=1;i<=12;i++){
+        let total=expensePerYear.reduce((sum,expense)=>{
+            return Number(expense.date.slice(5,7)) === i?sum+expense.amount:sum;
+        },0);
+
+        totalExpenses.push(Number(total.toFixed(2)));
+    }
+
+    return totalExpenses
+
+};
+
+function getLineChart(year){
+
+    const textColor=isDark?"#ffffff":"#000000";
+    const gridColor=isDark?"#ffffff34":"#0000003e";
+
+    const MonthlyExpense=groupExpensesByMonth(year);
+
+    if(lineChartInstance){
+        lineChartInstance.data.datasets[0].data=MonthlyExpense;
+        lineChartInstance.update();
+    }else{
+        lineChartInstance=new Chart(lineChart,{
+            type:"line",
+            data:{
+                labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+                datasets:[{
+                    label:'Expenses Per Month',
+                    data:MonthlyExpense,
+
+
+                }]
+
+            },
+            options:{
+                maintainAspectRatio:false,
+                plugins:{
+                    legend:{labels: { color: textColor } }
+                },
+                scales:{
+                    x: {
+                        ticks: { color: textColor },
+                        grid: { color: gridColor },
+                        border: { color: gridColor }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: textColor },
+                        grid: { color: gridColor },
+                        border: { color: gridColor }
+                    }
+                }
+            }
+
+
+        });
+    }
+}
+
+function getYearOptions(){
+    yearSelect.innerHTML=""
+
+    let years=[...new Set(expenses.map(expense =>{
+        return expense.date.slice(0,4);
+    }))];
+
+    years.sort().reverse();
+
+    years.forEach((year,index)=>{
+        const option=document.createElement("option");
+        option.setAttribute("value",year);
+        option.textContent=year;
+        if (index === 0) option.selected = true;
+        yearSelect.appendChild(option);
+    })
+
+        getLineChart(years[0]);
+
+}
+
+yearSelect.addEventListener("change",()=>{
+    const year=yearSelect.value;
+        getLineChart(year);
+
+});
+
+async function groupExpensesByCategory(){
+    try{
+        const response=await fetch(`${API_URL}/stats/category`);
+        const result=await response.json();
+        console.log(result);
+        if(!response.ok){
+            throw new Error(result.message || "Failed to Fetch category totals");
+        }
+        const sum = result.reduce((s, r) => s + r.total, 0);
+        return CATEGORIES.map(category =>{
+            const total=result.find(row =>{ return row.category === category})?.total??0;
+            return {
+                category,
+                total,
+                percentage:sum?Number((total/sum*100).toFixed(1)):0
+            };
+        });
+
+    }catch(error){  
+        console.log(error.message);
+        return null;
+    }
+}
+
+function getPieChart(totalExpenses){
+    const labels=totalExpenses.map(expense=>expense.category);
+    const totals=totalExpenses.map(expense=>expense.total);
+    const percentages=totalExpenses.map(expense=>expense.percentage);
+    const textColor=isDark?"#ffffff":"#000000";
+    if (pieChartInstance) {
+        pieChartInstance.data.datasets[0].data = totals;
+        pieChartInstance.data.datasets[0].percentages = percentages;
+        pieChartInstance.update();
+    }else{
+            pieChartInstance=new Chart(pieChart,{
+            type:'doughnut',
+            data:{
+                labels:labels,
+                datasets:[{
+                    labels:'Expenses By Categories',
+                    data:totals,
+                    percentages,
+                    backgroundColor:["#28a745","#007bff","#ffc107","#17a2b8","#6c757d"],
+                    borderColor:"#ffffff34",
+                    hoverBorderWidth: 3,
+                    hoverOffset: 14
+                }]
+            },
+                options:{
+                    maintainAspectRatio:false,
+                    layout:{
+                        padding:10
+                    },
+                    plugins:{
+                        legend:{labels: { color: textColor } },
+                        tooltip: {
+                        displayColors: false,
+                        callbacks:{
+                            label(context){
+                                return [
+                                    `total: ${context.raw}`,
+                                    `${context.dataset.percentages[context.dataIndex]}%`
+                                ];
+                            }
+                        }
+                    }
+                }
+                }
+            }
+        );
+    }
+}
+
+function exportCSV(){
+
+    if (currentExpenses.length === 0) {
+        showAlert("Nothing to export.", "warning");
         return;
     }
 
-    htmlElement.setAttribute("data-bs-theme","dark");
-    themeIcon.className = "bi bi-moon-fill";
-    localStorage.setItem("theme","dark");
-});
+    const header = ["Title", "Amount", "Category", "Date"].join(",");
+
+
+    let rows=currentExpenses.map(expense => 
+    [expense.title,expense.amount,expense.category,expense.date].join(",")
+    );
+
+    rows= [header, ...rows].join("\r\n");
+
+    const CSVFile = new Blob([rows], { type: "text/csv" });
+    let temp_link = document.createElement('a');
+
+    temp_link.download="table.csv";
+    let url=window.URL.createObjectURL(CSVFile);
+    temp_link.href=url;
+
+    temp_link.style.display="none";
+    document.body.appendChild(temp_link);
+
+        temp_link.click();
+    document.body.removeChild(temp_link);
+
+
+}
+
+document.getElementById("export-csv").addEventListener("click", exportCSV);

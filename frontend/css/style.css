@@ -50,6 +50,10 @@
    width: 100%;
 }
 
+.table-responsive{
+   max-height: 500px;
+   overflow-y: auto;
+}
 
 #expenses-table-body td:nth-child(5),
 #expenses-table-body td:nth-child(2){
@@ -93,16 +97,27 @@
    margin-right: 2.5rem;
 }
 
+.graph-card{
+   height: 100%;
+
+}
+
+.chart-box{
+   position: relative;
+   height: 300px;
+   width: 100%;
+}
 
 body,
-body *,
+.navbar,
+.card,
+.card-box,
 .form-control,
 .form-select,
 .btn{
-  transition:background-color .35s ease,
-      color .35s ease,
-      border-color .35s ease,
-      box-shadow .35s ease;
+  transition:background-color .3s ease-in-out,
+      color .3s ease,
+      border-color .3s ease-in-out
 }
 
 body::before{
@@ -160,15 +175,27 @@ body::before{
    background: rgba(0, 0, 0, 0.6);
 }
 
+[data-bs-theme="dark"] .graph-card{
+   background-color: #1b202c !important;
+
+}
+
+#export-csv{
+   width:100px;
+
+}
+
 @media (max-width: 767.98px) {
 
    .summary-card{
       grid-template-columns: 1fr;
 
    }
+
    .card-box{
       min-height: 105px;
       padding: 0.5rem;
+      
    }
    
 }
